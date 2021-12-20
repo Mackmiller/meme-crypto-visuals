@@ -1,11 +1,9 @@
 require('dotenv').config()
 const express = require('express')
-
-// import axios
 const axios = require('axios')
-
-// instantiate a router (mini app that only handles routes)
 const router = express.Router()
+
+// config for api call
 var config = {
     method: 'GET',
     url: 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/category?id=6051a82566fc1b42617d6dc6&limit=10',
@@ -19,15 +17,42 @@ var config = {
     },
     json: true
 }
-
+// GET all meme coins
 router.get('/', (req, res, next) => {
     axios(config)
         .then(function(response) {
             // entire data object for meme category
-            // console.log(res.json(response.data))
-            
+            console.log(res.json(response.data))
+
             // specifically the coins data within the meme category
-            console.log(res.json(response.data.data.coins))
+            // console.log(res.json(response.data.data.coins))
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        
+})
+
+// GET metadata for specific coin (id)
+router.get('/cryptocoin/:id', (req, res, next) => {
+    var config = {
+        method: 'GET',
+        url: `https://pro-api.coinmarketcap.com/v1/cryptocurrency/info?id=${req.params.id}`,
+        qs: {
+            'start': '1',
+            'limit': '10',
+            'convert': 'USD'
+          },
+        headers: {
+            "X-CMC_PRO_API_KEY": `${process.env.API_KEY}`
+        },
+        json: true
+    }
+    console.log('coin selected: ', req.params.id)
+    axios(config)
+        .then(function(response) {
+            console.log('This is the individual coin metadata', res.json(response.data))
+            console.log(res.json(response.data))
         })
         .catch(function (error) {
             console.log(error);
