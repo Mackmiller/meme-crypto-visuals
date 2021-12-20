@@ -23,8 +23,11 @@ var config = {
 router.get('/', (req, res, next) => {
     axios(config)
         .then(function(response) {
-            //console.log('Response data:\n', JSON.stringify(response.data))
-            console.log(res.json(response.data))
+            // entire data object for meme category
+            // console.log(res.json(response.data))
+            
+            // specifically the coins data within the meme category
+            console.log(res.json(response.data.data.coins))
         })
         .catch(function (error) {
             console.log(error);
