@@ -3,12 +3,23 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 
-//coincap api
-const coincap = require('./app/routes/coinCapApi')
+// require route files
+const exampleRoutes = require('./app/routes/example_routes')
+const userRoutes = require('./app/routes/user_routes')
+// coincap api route file
+const coincapRoutes = require('./app/routes/coinCapApi')
+
+// require middleware
+const errorHandler = require('./lib/error_handler')
+const replaceToken = require('./lib/replace_token')
+const requestLogger = require('./lib/request_logger')
 
 // require database configuration logic
 // `db` will be the actual Mongo URI as a string
 const db = require('./config/db')
+
+// require configured passport authentication middleware
+const auth = require('./lib/auth')
 
 // define server and client ports
 // used for cors and local port declaration
@@ -21,10 +32,12 @@ const clientDevPort = 3000
 mongoose.connect(db, {
 	useNewUrlParser: true,
 })
+
 // Connection string for Atlas MongoDb cloud
-mongoose.connection.once('open', () => {
-	console.log(`Connected to MongoDb at ${mongoose.connection.host}:${mongoose.connection.port}`)
-})
+// mongoose.connection.once('open', () => {
+// 	console.log(`Connected to MongoDb at ${mongoose.connection.host}:${mongoose.connection.port}`)
+// })
+
 // instantiate express application object
 const app = express()
 
@@ -43,6 +56,14 @@ app.use(
 // adding PORT= to your env file will be necessary for deployment
 const port = process.env.PORT || serverDevPort
 
+// this middleware makes it so the client can use the Rails convention
+// of `Authorization: Token token=<token>` OR the Express convention of
+// `Authorization: Bearer <token>`
+app.use(replaceToken)
+
+// register passport authentication middleware
+app.use(auth)
+
 // add `express.json` middleware which will parse JSON requests into
 // JS objects before they reach the route files.
 // The method `.use` sets up middleware for the Express application
@@ -50,8 +71,18 @@ app.use(express.json())
 // this parses requests sent by `$.ajax`, which use a different content type
 app.use(express.urlencoded({ extended: true }))
 
-// coin cap routes
-app.use(coincap)
+// log each request as it comes in for debugging
+app.use(requestLogger)
+
+// register route files
+app.use(exampleRoutes)
+app.use(userRoutes)
+app.use(coincapRoutes)
+
+// register error handling middleware
+// note that this comes after the route middlewares, because it needs to be
+// passed any error messages from them
+app.use(errorHandler)
 
 // run API on designated port
 app.listen(port, () => {
