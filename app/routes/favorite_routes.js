@@ -60,55 +60,19 @@ router.get('/favorites/user/:userId', (req, res, next) => {
 	})
 
 
-// // SHOW
-// // GET /favorites/5a7db6c74d55bc51bdf39793
-// router.get('/favorites', requireToken, (req, res, next) => {
-// 	// req.params.id will be set based on the `:id` in the route
-// 	Favorite.findById(req.params.id)
-// 		.then(handle404)
-// 		// if `findById` is succesful, respond with 200 and "favorite" JSON
-// 		.then((favorite) => res.status(200).json({ favorite: favorite.toObject() }))
-// 		// if an error occurs, pass it to the handler
-// 		.catch(next)
-// })
-
-// // UPDATE
-// // PATCH /favorites/5a7db6c74d55bc51bdf39793
-// router.patch('/favorites/:id', requireToken, removeBlanks, (req, res, next) => {
-// 	// if the client attempts to change the `owner` property by including a new
-// 	// owner, prevent that by deleting that key/value pair
-// 	delete req.body.favorite.owner
-
-// 	Favorite.findById(req.params.id)
-// 		.then(handle404)
-// 		.then((favorite) => {
-// 			// pass the `req` object and the Mongoose record to `requireOwnership`
-// 			// it will throw an error if the current user isn't the owner
-// 			requireOwnership(req, favorite)
-
-// 			// pass the result of Mongoose's `.update` to the next `.then`
-// 			return favorite.updateOne(req.body.favorite)
-// 		})
-// 		// if that succeeded, return 204 and no JSON
-// 		.then(() => res.sendStatus(204))
-// 		// if an error occurs, pass it to the handler
-// 		.catch(next)
-// })
-
 // DESTROY
-// DELETE /favorites/5a7db6c74d55bc51bdf39793
-router.delete('/favorites/:id', requireToken, (req, res, next) => {
-	Favorite.findById(req.params.id)
-		.then(handle404)
+// DELETE one from /favorites
+router.delete('/favorites/user/:userId', requireToken, (req, res, next) => {
+	req.body.favorite.userId = req.user.id
+
+	Favorite.deleteOne(req.body.favorite)
+		// respond to succesful `create` with status 201 and JSON of new "favorite"
 		.then((favorite) => {
-			// throw an error if current user doesn't own `favorite`
-			requireOwnership(req, favorite)
-			// delete the favorite ONLY IF the above didn't throw
-			favorite.deleteOne()
+			res.sendStatus(204)
 		})
-		// send back 204 and no content if the deletion succeeded
-		.then(() => res.sendStatus(204))
-		// if an error occurs, pass it to the handler
+		// if an error occurs, pass it off to our error handler
+		// the error handler needs the error message and the `res` object so that it
+		// can send an error message back to the client
 		.catch(next)
 })
 
