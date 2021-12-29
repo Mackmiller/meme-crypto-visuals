@@ -6,7 +6,7 @@ const cors = require('cors')
 // require route files
 const exampleRoutes = require('./app/routes/example_routes')
 const userRoutes = require('./app/routes/user_routes')
-// coincap api route file
+const favoriteRoutes = require('./app/routes/favorite_routes')
 const coincapRoutes = require('./app/routes/coinCapApi')
 
 // require middleware
@@ -77,6 +77,7 @@ app.use(requestLogger)
 // register route files
 app.use(exampleRoutes)
 app.use(userRoutes)
+app.use(favoriteRoutes)
 app.use(coincapRoutes)
 
 // register error handling middleware
