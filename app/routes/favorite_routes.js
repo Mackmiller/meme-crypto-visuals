@@ -4,7 +4,8 @@ const express = require('express')
 const passport = require('passport')
 
 // pull in Mongoose model for favorites
-const favorite = require('../models/favorite')
+const Favorite = require('../models/favorite')
+const User = require('../models/user')
 
 // this is a collection of methods that help us detect situations when we need
 // to throw a custom error
@@ -27,41 +28,13 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
-// INDEX
-// GET /favorites
-router.get('/favorites', requireToken, (req, res, next) => {
-	favorite.find()
-		.then((favorites) => {
-			// `favorites` will be an array of Mongoose documents
-			// we want to convert each one to a POJO, so we use `.map` to
-			// apply `.toObject` to each one
-			return favorites.map((favorite) => favorite.toObject())
-		})
-		// respond with status 200 and JSON of the favorites
-		.then((favorites) => res.status(200).json({ favorites: favorites }))
-		// if an error occurs, pass it to the handler
-		.catch(next)
-})
-
-// SHOW
-// GET /favorites/5a7db6c74d55bc51bdf39793
-router.get('/favorites/:id', requireToken, (req, res, next) => {
-	// req.params.id will be set based on the `:id` in the route
-	favorite.findById(req.params.id)
-		.then(handle404)
-		// if `findById` is succesful, respond with 200 and "favorite" JSON
-		.then((favorite) => res.status(200).json({ favorite: favorite.toObject() }))
-		// if an error occurs, pass it to the handler
-		.catch(next)
-})
-
 // CREATE
 // POST /favorites
 router.post('/favorites', requireToken, (req, res, next) => {
 	// set owner of new favorite to be current user
-	req.body.favorite.owner = req.user.id
+	req.body.favorite.userId = req.user.id
 
-	favorite.create(req.body.favorite)
+	Favorite.create(req.body.favorite)
 		// respond to succesful `create` with status 201 and JSON of new "favorite"
 		.then((favorite) => {
 			res.status(201).json({ favorite: favorite.toObject() })
@@ -72,33 +45,60 @@ router.post('/favorites', requireToken, (req, res, next) => {
 		.catch(next)
 })
 
-// UPDATE
-// PATCH /favorites/5a7db6c74d55bc51bdf39793
-router.patch('/favorites/:id', requireToken, removeBlanks, (req, res, next) => {
-	// if the client attempts to change the `owner` property by including a new
-	// owner, prevent that by deleting that key/value pair
-	delete req.body.favorite.owner
-
-	favorite.findById(req.params.id)
+// INDEX
+// GET /favorites
+router.get('/favorites/user/:userId', (req, res, next) => {
+	Favorite.find({ 'userId': req.params.userId })
 		.then(handle404)
-		.then((favorite) => {
-			// pass the `req` object and the Mongoose record to `requireOwnership`
-			// it will throw an error if the current user isn't the owner
-			requireOwnership(req, favorite)
-
-			// pass the result of Mongoose's `.update` to the next `.then`
-			return favorite.updateOne(req.body.favorite)
-		})
-		// if that succeeded, return 204 and no JSON
-		.then(() => res.sendStatus(204))
+		// respond with status 200 and JSON of the profiles
+		// .then((favorites) => {
+		// 	return favorites.map((favorite) => favorite.toObject())
+		// })
+		.then((favorites) => res.status(200).json({ favorites: favorites}))
 		// if an error occurs, pass it to the handler
 		.catch(next)
-})
+	})
+
+
+// // SHOW
+// // GET /favorites/5a7db6c74d55bc51bdf39793
+// router.get('/favorites', requireToken, (req, res, next) => {
+// 	// req.params.id will be set based on the `:id` in the route
+// 	Favorite.findById(req.params.id)
+// 		.then(handle404)
+// 		// if `findById` is succesful, respond with 200 and "favorite" JSON
+// 		.then((favorite) => res.status(200).json({ favorite: favorite.toObject() }))
+// 		// if an error occurs, pass it to the handler
+// 		.catch(next)
+// })
+
+// // UPDATE
+// // PATCH /favorites/5a7db6c74d55bc51bdf39793
+// router.patch('/favorites/:id', requireToken, removeBlanks, (req, res, next) => {
+// 	// if the client attempts to change the `owner` property by including a new
+// 	// owner, prevent that by deleting that key/value pair
+// 	delete req.body.favorite.owner
+
+// 	Favorite.findById(req.params.id)
+// 		.then(handle404)
+// 		.then((favorite) => {
+// 			// pass the `req` object and the Mongoose record to `requireOwnership`
+// 			// it will throw an error if the current user isn't the owner
+// 			requireOwnership(req, favorite)
+
+// 			// pass the result of Mongoose's `.update` to the next `.then`
+// 			return favorite.updateOne(req.body.favorite)
+// 		})
+// 		// if that succeeded, return 204 and no JSON
+// 		.then(() => res.sendStatus(204))
+// 		// if an error occurs, pass it to the handler
+// 		.catch(next)
+// })
 
 // DESTROY
 // DELETE /favorites/5a7db6c74d55bc51bdf39793
 router.delete('/favorites/:id', requireToken, (req, res, next) => {
-	favorite.findById(req.params.id)
+	Favorite.findById(req.params.id)
 		.then(handle404)
 		.then((favorite) => {
 			// throw an error if current user doesn't own `favorite`
