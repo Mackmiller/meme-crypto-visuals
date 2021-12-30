@@ -28,10 +28,12 @@ const requireToken = passport.authenticate('bearer', { session: false })
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
 
+
 // CREATE
 // POST /favorites
 router.post('/favorites', requireToken, (req, res, next) => {
 	// set owner of new favorite to be current user
+	// console.log("this is req.user:". req.user)
 	req.body.favorite.userId = req.user.id
 
 	Favorite.create(req.body.favorite)
