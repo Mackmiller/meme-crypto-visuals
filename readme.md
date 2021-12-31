@@ -7,20 +7,18 @@ This is a web application which allows users to view the top tokens and coins wi
 
 ## Tech stack
 
-- Current: Express, React, Node 
-- In progress: MongoDB
+- MongoDB, Express, React, Node 
 
 ## User flows
 
-- Current:
-    - I want to see top coins and tokens for the Meme cryptocurrency category, including logo, quick figures, and visuals
-- In progress:
-    - I want to be able to sign up/login for an account
-    - I want to save a particular coin to my account
+- I want to see top coins and tokens for the Meme cryptocurrency category, including logo and current numbers
+- I want to be able to compare cryptocurrencies through an interactive data visualization
+- I want to be able to sign up/login for an account
+- I want to add a "screenshot" of a particular coin, on a particular day, at a particular price, to my user account for my future reference
 
 ## ERD visual
 
-<img alt="erd" src="basic_erd.png">
+<img alt="erd" src="updated_erd.png">
 
 ## Local Setup
 
@@ -50,6 +48,10 @@ nodemon
 ```
 
 - Part 2 of local installment includes forking and cloning the client repository, which can be found [here](https://github.com/Mackmiller/meme-crypto-visuals-client)
+
+- Once Part 2 has been locally deployed, navigate to localhost3000 and the project automatically appears on your locally hosted web page, similar to this screenshot:
+
+<img alt="project" src="project_view.png">
 
 ## Cloud Deployment
 
