@@ -47,9 +47,7 @@ const app = express()
 // 	cors()
 // )
 app.use(
-	cors({
-		origin: process.env.CLIENT_ORIGIN || `http://localhost:${clientDevPort}`,
-	})
+	cors()
 )
 
 // define port for API to run on
