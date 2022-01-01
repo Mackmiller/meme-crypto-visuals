@@ -54,7 +54,7 @@ app.use(
 
 // define port for API to run on
 // adding PORT= to your env file will be necessary for deployment
-const port = process.env.PORT || 8000
+const port = process.env.PORT || serverDevPort
 
 // this middleware makes it so the client can use the Rails convention
 // of `Authorization: Token token=<token>` OR the Express convention of
