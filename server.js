@@ -54,7 +54,7 @@ app.use(
 
 // define port for API to run on
 // adding PORT= to your env file will be necessary for deployment
-const port = process.env.PORT || serverDevPort
+const port = process.env.PORT || 8000
 
 // this middleware makes it so the client can use the Rails convention
 // of `Authorization: Token token=<token>` OR the Express convention of
@@ -89,6 +89,23 @@ app.use(errorHandler)
 app.listen(port, () => {
 	console.log('listening on port ' + port)
 })
+
+// Fire off the connection to Mongo DB
+mongoose.connect(process.env.MONGODB_URI, {
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+	useCreateIndex: true,
+	useFindAndModify: false
+  });
+  
+  
+  mongoose.connection.on('connected', () => {
+	console.log(`Mongoose connected to ${mongoose.connection.host}:${mongoose.connection.port}`);
+  });
+  
+  mongoose.connection.on("error", (err) => {
+	console.log("Could not connect to MongoDB!", err);
+  });
 
 // needed for testing
 module.exports = app
